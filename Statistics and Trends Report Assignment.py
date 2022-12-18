@@ -188,31 +188,25 @@ df_filtered = df[column_label4]
 data_filtered = data_filtered.assign(col4=df_filtered[column_label4])
 
 
-
-
-
-
-
-
-
-
 data_corr_ready = data_filtered[4:-1]
 
 data_corr_ready["col2"] = data_corr_ready["col2"]/1000000000
+data_corr_ready["col4"] = data_corr_ready["col4"]/1000000000
 
 # Select the data for the x and y axes
-x = data_corr_ready["col1"]
-y = data_corr_ready["col2"]
+x1 = data_corr_ready["col1"]
+y1 = data_corr_ready["col2"]
+x2 = data_corr_ready["col3"]
+y2 = data_corr_ready["col4"]
 
 # Create the scatter plot
-plt.scatter(x, y)
+plt.scatter(x1, y1, c='b', label='China')
+plt.scatter(x2, y2, c='r', label='India')
 plt.ylabel("Population total (Billions)")
 plt.xlabel("CO2 emissions from liquid fuel consumption (kt)")
 
-# Fit a line to the data
-fit = np.polyfit(x, y, 1)
-fit_fn = np.poly1d(fit)
-plt.plot(x, fit_fn(x), '--k')
+# Add a legend
+plt.legend()
 
 # Show the plot
 plt.show()
