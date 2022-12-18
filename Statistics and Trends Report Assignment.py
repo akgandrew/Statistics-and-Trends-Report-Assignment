@@ -7,12 +7,18 @@ Created on Mon Dec 12 18:33:59 2022
 
 #import required modules
 
-
 import matplotlib.pyplot as plt
 
 import pandas as pd
 
 import import_csv
+
+from scipy.stats import shapiro
+
+from scipy.stats import pearsonr
+
+from scipy.stats import ttest_ind
+
 
 # using function import_csv_to_DF_transpose from module import_csv
 
@@ -34,7 +40,6 @@ first_row = df_all_data.iloc[0]
 
 # Use the `rename` method to rename the columns to make the df more clear
 df_all_data.rename(columns=first_row, inplace=True)
-
 
 df_pop_total = df_all_data.loc[df_all_data['Indicator Code'].str.contains('SP.POP.TOTL')]
 
@@ -88,8 +93,6 @@ plt.show()
 
 print(df_all_data)
 
-# create function to analyse top 10 countries comparing two variables by factor
-# e.g. C02 vs forrest % etc
 
 # shifting to using transposed dataframe where 
 # countries and environmental factors arranged as columns
@@ -120,19 +123,24 @@ df_nan = df_all_data_transposed.isnull()
 # Count the number of NaN values in each column of data
 nan_count = df_nan.sum()
 
-# Select only the columns that have full data sets first 4 rows will be nan 
-# so columns 
-
+# Select only the columns that have mostly full data sets first 4 rows will be nan 
+# so will allow 11 other missing values so we have 75% or data minimum
 
 df_filtered = df_all_data_transposed.loc[:, nan_count < 15]
 
 
-from scipy.stats import shapiro
+#change to df notation for dataframe for upcoming function
 
 df = df_filtered
+
+
 # Loop through the columns of the dataframe to find shapiro wilk and ttest 
 # and non parametric equivalents for analysis later
+
+
 for col, data in df.iteritems():
+    
+    
     # Slice the data from row 4 to the last row
     data_sliced = data.iloc[4:]
 
@@ -218,7 +226,6 @@ plt.show()
 
 ##data was reported as normal so a persons correlation undertook.
 
-from scipy.stats import pearsonr
 # Extract the two columns of interest
 x = x1
 y = y1
@@ -226,7 +233,7 @@ y = y1
 # Compute the Pearson correlation coefficient
 corr1, pval1 = pearsonr(x, y)
 
-## for China P value less than 0.001 and r value 0.904
+## for China P value less than 0.0001 and r value 0.904
 # Extract the two columns of interest
 x = x2
 y = y2
@@ -234,7 +241,7 @@ y = y2
 # Compute the Pearson correlation coefficient
 corr2, pval2 = pearsonr(x, y)
 
-## for India P value less than 0.001 and r value 0.954
+## for India P value less than 0.0001 and r value 0.954
 
 
 # creat new dataframe
@@ -275,7 +282,7 @@ df_filtered = df[column_label4]
 # add column to dataframe column 4
 data_filtered = data_filtered.assign(col4=df_filtered[column_label4])
 
-
+# prepare data for statistical analysis
 data_corr_ready = data_filtered[5:-4]
 
 
@@ -305,7 +312,7 @@ y = y1
 # Compute the Pearson correlation coefficient
 corr3, pval3 = pearsonr(x, y)
 
-## for China P value less than 0.001 and r value 0.702
+## for China P value less than 0.0001 and r value 0.702
 # Extract the two columns of interest
 x = x2
 y = y2
@@ -313,15 +320,7 @@ y = y2
 # Compute the Pearson correlation coefficient
 corr4, pval4 = pearsonr(x, y)
 
-## for India P value less than 0.001 and r value -0.42
-
-
-
-
-
-
-
-
+## for India P value less than 0.0001 and r value -0.42
 
 
 #### comparing mean values between china and india
@@ -347,17 +346,12 @@ df_filtered = df[column_label2]
 # add column to dataframe column 2
 data_filtered = data_filtered.assign(col2=df_filtered[column_label2])
 
-# Select the row to plot
+# Prepare data in suitable format for plot and analysis
 mean_datarow = data_filtered.loc['Mean Result']
 stdev_datarow = data_filtered.loc['Stdev Result']
 mean_data = mean_datarow.to_frame()
 stdev_data = stdev_datarow.to_frame()
-# Create the bar chart
-#mean_datarow.plot.bar(x=df.index, y=row.values, yerr = stdev_datarow)
-#plt.bar(range(len(mean_data)), mean_data, yerr=stdev_data)
 
-#plt.legend(['China','India'])
-#plt.show()
 
 # Data to be plotted
 mean_data = pd.DataFrame({'Country': ['India', 'China'], 'Mean': [mean_data.iloc[0,0], mean_data.iloc[1,0]]})
@@ -376,14 +370,20 @@ plt.show()
 
 # Both data Were normally normally distributed (P>0.05) 
 # according to Shapiro Wilk so a ttest was performed 
-from scipy.stats import ttest_ind
+
+#prepare data for ttest(removing nans)
+
 India_china_data = data_filtered[5:-3]
 India_data = India_china_data['col1']
 China_data = India_china_data['col2']
 
+#perform ttest
+
 t_stat, p_value = ttest_ind(India_data, China_data)
 
-from scipy.stats import pearsonr
+# t value = 3.02 p value =0.003
+
+
 # Extract the two columns of interest
 x = India_data 
 y = China_data
