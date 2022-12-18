@@ -7,7 +7,6 @@ Created on Mon Dec 12 18:33:59 2022
 
 #import required modules
 
-import numpy as np
 
 import matplotlib.pyplot as plt
 
@@ -191,9 +190,11 @@ df_filtered = df[column_label4]
 # add column to dataframe column 4
 data_filtered = data_filtered.assign(col4=df_filtered[column_label4])
 
+# dat removed for last 5 years as data missing for C02.
 
-data_corr_ready = data_filtered[4:-1]
+data_corr_ready = data_filtered[5:-8]
 
+#data adjusted to billions for clearer graphs
 data_corr_ready["col2"] = data_corr_ready["col2"]/1000000000
 data_corr_ready["col4"] = data_corr_ready["col4"]/1000000000
 
@@ -214,6 +215,26 @@ plt.legend()
 
 # Show the plot
 plt.show()
+
+##data was reported as normal so a persons correlation undertook.
+
+from scipy.stats import pearsonr
+# Extract the two columns of interest
+x = x1
+y = y1
+
+# Compute the Pearson correlation coefficient
+corr1, pval1 = pearsonr(x, y)
+
+## for China P value less than 0.001 and r value 0.904
+# Extract the two columns of interest
+x = x2
+y = y2
+
+# Compute the Pearson correlation coefficient
+corr2, pval2 = pearsonr(x, y)
+
+## for India P value less than 0.001 and r value 0.954
 
 
 # creat new dataframe
@@ -255,7 +276,7 @@ df_filtered = df[column_label4]
 data_filtered = data_filtered.assign(col4=df_filtered[column_label4])
 
 
-data_corr_ready = data_filtered[4:-1]
+data_corr_ready = data_filtered[5:-4]
 
 
 # Select the data for the x and y axes
@@ -275,6 +296,31 @@ plt.legend()
 
 # Show the plot
 plt.show()
+
+
+# Extract the two columns of interest
+x = x1
+y = y1
+
+# Compute the Pearson correlation coefficient
+corr3, pval3 = pearsonr(x, y)
+
+## for China P value less than 0.001 and r value 0.702
+# Extract the two columns of interest
+x = x2
+y = y2
+
+# Compute the Pearson correlation coefficient
+corr4, pval4 = pearsonr(x, y)
+
+## for India P value less than 0.001 and r value -0.42
+
+
+
+
+
+
+
 
 
 
@@ -314,8 +360,8 @@ stdev_data = stdev_datarow.to_frame()
 #plt.show()
 
 # Data to be plotted
-mean_data = pd.DataFrame({'Country': ['India', 'China'], 'Mean': [mean_data.iloc[0,0], mean_data.iloc[0,0]]})
-stdev_data = pd.DataFrame({'Country': ['India', 'China'], 'Std Dev': [stdev_data.iloc[0,0], stdev_data.iloc[0,0]]})
+mean_data = pd.DataFrame({'Country': ['India', 'China'], 'Mean': [mean_data.iloc[0,0], mean_data.iloc[1,0]]})
+stdev_data = pd.DataFrame({'Country': ['India', 'China'], 'Std Dev': [stdev_data.iloc[0,0], stdev_data.iloc[1,0]]})
 
 
 # Merge the data into a single DataFrame
@@ -323,7 +369,25 @@ data = mean_data.merge(stdev_data, on='Country')
 
 # Create the bar chart
 plt.bar(data['Country'], data['Mean'], yerr=data['Std Dev'], capsize=5)
-
-
+plt.ylabel("Urban population growth (annual %)")
+plt.plot(1, 5, marker='*', markersize=10, color='red')
 # Show the plot
 plt.show()
+
+# Both data Were normally normally distributed (P>0.05) 
+# according to Shapiro Wilk so a ttest was performed 
+from scipy.stats import ttest_ind
+India_china_data = data_filtered[5:-3]
+India_data = India_china_data['col1']
+China_data = India_china_data['col2']
+
+t_stat, p_value = ttest_ind(India_data, China_data)
+
+from scipy.stats import pearsonr
+# Extract the two columns of interest
+x = India_data 
+y = China_data
+
+# Compute the Pearson correlation coefficient
+corr, pval = pearsonr(x, y)
+
