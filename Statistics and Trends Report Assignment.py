@@ -219,7 +219,7 @@ plt.show()
 # creat new dataframe
 data_filtered = pd.DataFrame()
 
- # Identify the column with data that includes both 'country code' and 'variable code'
+# Identify the column with data that includes both 'country code' and 'variable code'
 column_label1 = df.columns[df.apply(lambda x: x.str.contains('CHN').any() & x.str.contains('AG.LND.ARBL.ZS').any())]
 
 # Filter the original DataFrame to include only the identified column
@@ -279,3 +279,51 @@ plt.show()
 
 
 #### comparing mean values between china and india
+
+### Comparing Urban population growth
+# creat new dataframe
+data_filtered = pd.DataFrame()
+
+# Identify the column with data that includes both 'country code' and 'variable code'
+column_label1 = df.columns[df.apply(lambda x: x.str.contains('IND').any() & x.str.contains('SP.URB.GROW').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label1]
+
+# add column to dataframe column 1
+data_filtered = data_filtered.assign(col1=df_filtered[column_label1])
+
+column_label2 = df.columns[df.apply(lambda x: x.str.contains('CHN').any() & x.str.contains('SP.URB.GROW').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label2]
+
+# add column to dataframe column 2
+data_filtered = data_filtered.assign(col2=df_filtered[column_label2])
+
+# Select the row to plot
+mean_datarow = data_filtered.loc['Mean Result']
+stdev_datarow = data_filtered.loc['Stdev Result']
+mean_data = mean_datarow.to_frame()
+stdev_data = stdev_datarow.to_frame()
+# Create the bar chart
+#mean_datarow.plot.bar(x=df.index, y=row.values, yerr = stdev_datarow)
+#plt.bar(range(len(mean_data)), mean_data, yerr=stdev_data)
+
+#plt.legend(['China','India'])
+#plt.show()
+
+# Data to be plotted
+mean_data = pd.DataFrame({'Country': ['India', 'China'], 'Mean': [mean_data.iloc[0,0], mean_data.iloc[0,0]]})
+stdev_data = pd.DataFrame({'Country': ['India', 'China'], 'Std Dev': [stdev_data.iloc[0,0], stdev_data.iloc[0,0]]})
+
+
+# Merge the data into a single DataFrame
+data = mean_data.merge(stdev_data, on='Country')
+
+# Create the bar chart
+plt.bar(data['Country'], data['Mean'], yerr=data['Std Dev'], capsize=5)
+
+
+# Show the plot
+plt.show()
