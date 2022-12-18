@@ -121,14 +121,16 @@ df_nan = df_all_data_transposed.isnull()
 # Count the number of NaN values in each column of data
 nan_count = df_nan.sum()
 
-# Select only the columns that have less than 25 NaN values 
-#25 chosen as first 4 rows will be nan (false) then 50% of 42 years 
-# is 21 so 21 + 4 =25
-df_filtered = df_all_data_transposed.loc[:, nan_count < 25]
+# Select only the columns that have full data sets first 4 rows will be nan 
+# so columns 
+
+
+df_filtered = df_all_data_transposed.loc[:, nan_count < 15]
+
 
 from scipy.stats import shapiro
 
-df = df_all_data_transposed
+df = df_filtered
 # Loop through the columns of the dataframe
 for col, data in df.iteritems():
     # Slice the data from row 4 to the last row
@@ -146,5 +148,74 @@ for col, data in df.iteritems():
     # Add a new row at the bottom of the column with the results of the Shapiro-Wilk test
     df.at['Normality Result', col] = result
     
-df_correlation_ready = df
+
+# creat new dataframe
+data_filtered = pd.DataFrame()
+
+ # Identify the column with data that includes both 'country code' and 'variable code'
+column_label1 = df.columns[df.apply(lambda x: x.str.contains('CHN').any() & x.str.contains('EN.ATM.CO2E.LF.KT').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label1]
+
+# add column to dataframe column 1
+data_filtered = data_filtered.assign(col1=df_filtered[column_label1])
+
+column_label2 = df.columns[df.apply(lambda x: x.str.contains('CHN').any() & x.str.contains('SP.POP.TOTL').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label2]
+
+# add column to dataframe column 2
+data_filtered = data_filtered.assign(col2=df_filtered[column_label2])
+
+
+ # Identify the column with data that includes both 'country code' and 'variable code'
+column_label3 = df.columns[df.apply(lambda x: x.str.contains('IND').any() & x.str.contains('EN.ATM.CO2E.LF.KT').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label3]
+
+# add column to dataframe column 3
+data_filtered = data_filtered.assign(col3=df_filtered[column_label3])
+
+column_label4 = df.columns[df.apply(lambda x: x.str.contains('IND').any() & x.str.contains('SP.POP.TOTL').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label4]
+
+# add column to dataframe column 4
+data_filtered = data_filtered.assign(col4=df_filtered[column_label4])
+
+
+
+
+
+
+
+
+
+
+data_corr_ready = data_filtered[4:-1]
+
+data_corr_ready["col2"] = data_corr_ready["col2"]/1000000000
+
+# Select the data for the x and y axes
+x = data_corr_ready["col1"]
+y = data_corr_ready["col2"]
+
+# Create the scatter plot
+plt.scatter(x, y)
+plt.ylabel("Population total (Billions)")
+plt.xlabel("CO2 emissions from liquid fuel consumption (kt)")
+
+# Fit a line to the data
+fit = np.polyfit(x, y, 1)
+fit_fn = np.poly1d(fit)
+plt.plot(x, fit_fn(x), '--k')
+
+# Show the plot
+plt.show()
+
+
 
