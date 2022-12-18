@@ -131,13 +131,16 @@ df_filtered = df_all_data_transposed.loc[:, nan_count < 15]
 from scipy.stats import shapiro
 
 df = df_filtered
-# Loop through the columns of the dataframe
+# Loop through the columns of the dataframe to find shapiro wilk and ttest 
+# and non parametric equivalents for analysis later
 for col, data in df.iteritems():
     # Slice the data from row 4 to the last row
     data_sliced = data.iloc[4:]
 
     # Calculate the Shapiro-Wilk test for normality
     stat, p = shapiro(data_sliced)
+    mean_stat = data_sliced.mean()
+    stdev_stat = data_sliced.std()
 
     # If the p-value is less than 0.05, the data is not normal
     if p < 0.05:
@@ -147,7 +150,8 @@ for col, data in df.iteritems():
 
     # Add a new row at the bottom of the column with the results of the Shapiro-Wilk test
     df.at['Normality Result', col] = result
-    
+    df.at['Mean Result', col] = mean_stat
+    df.at['Stdev Result', col] = stdev_stat
 
 # creat new dataframe
 data_filtered = pd.DataFrame()
@@ -212,4 +216,66 @@ plt.legend()
 plt.show()
 
 
+# creat new dataframe
+data_filtered = pd.DataFrame()
 
+ # Identify the column with data that includes both 'country code' and 'variable code'
+column_label1 = df.columns[df.apply(lambda x: x.str.contains('CHN').any() & x.str.contains('AG.LND.ARBL.ZS').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label1]
+
+# add column to dataframe column 1
+data_filtered = data_filtered.assign(col1=df_filtered[column_label1])
+
+column_label2 = df.columns[df.apply(lambda x: x.str.contains('CHN').any() & x.str.contains('SP.URB.TOTL.IN.ZS').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label2]
+
+# add column to dataframe column 2
+data_filtered = data_filtered.assign(col2=df_filtered[column_label2])
+
+
+ # Identify the column with data that includes both 'country code' and 'variable code'
+column_label3 = df.columns[df.apply(lambda x: x.str.contains('IND').any() & x.str.contains('AG.LND.ARBL.ZS').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label3]
+
+# add column to dataframe column 3
+data_filtered = data_filtered.assign(col3=df_filtered[column_label3])
+
+column_label4 = df.columns[df.apply(lambda x: x.str.contains('IND').any() & x.str.contains('SP.URB.TOTL.IN.ZS').any())]
+
+# Filter the original DataFrame to include only the identified column
+df_filtered = df[column_label4]
+
+# add column to dataframe column 4
+data_filtered = data_filtered.assign(col4=df_filtered[column_label4])
+
+
+data_corr_ready = data_filtered[4:-1]
+
+
+# Select the data for the x and y axes
+x1 = data_corr_ready["col1"]
+y1 = data_corr_ready["col2"]
+x2 = data_corr_ready["col3"]
+y2 = data_corr_ready["col4"]
+
+# Create the scatter plot
+plt.scatter(x1, y1, c='b', label='China')
+plt.scatter(x2, y2, c='r', label='India')
+plt.ylabel("Urban population (% of total population)")
+plt.xlabel("Arable land (% of land area)")
+
+# Add a legend
+plt.legend()
+
+# Show the plot
+plt.show()
+
+
+
+#### comparing mean values between china and india
